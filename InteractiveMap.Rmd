@@ -1,0 +1,38 @@
+---
+title: "InteractiveMap"
+author: "Jasper"
+date: "2025-02-28"
+output: html_document
+---
+
+
+```{r}
+library(rinat)
+library(tidyverse)
+library(mapview)
+library(leafpop)
+library(sf)
+
+#Call the data directly from iNat
+pc <- get_inat_obs(taxon_name = "Protea cynaroides",
+                   bounds = c(-35, 18, -33.5, 18.5),
+                   maxresults = 1000)
+
+#Filter out bad records
+pc <- pc %>% filter(positional_accuracy<46 & 
+                latitude<0 &
+                !is.na(latitude) &
+                captive_cultivated == "false" &
+                quality_grade == "research")
+
+
+#Make the dataframe a spatial object of class = "sf"
+pc <- st_as_sf(pc, coords = c("longitude", "latitude"), crs = 4326)
+
+#Plot the data
+mapview(pc, 
+        popup = 
+          popupTable(pc,
+            zcol = c("user_login", "captive_cultivated", "url")))
+```
+
